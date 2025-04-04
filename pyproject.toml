@@ -1,0 +1,22 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "livekit-plugins-uplift"
+version = "0.1.0"
+description = "Agent Framework plugin for voice synthesis with Uplift AI."
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.9"
+authors = [{ name = "Ammar", email = "ammar@itsitgroup.com" }]
+dependencies = ["livekit-agents[codecs]>=1.0.0.rc6", "aiohttp"]
+
+[project.urls]
+Homepage = "https://github.com/YOUR_GITHUB/livekit-plugins-uplift"
+
+[tool.hatch.build.targets.wheel]
+packages = ["livekit"]
+
+[tool.hatch.build.targets.sdist]
+include = ["/livekit"]
