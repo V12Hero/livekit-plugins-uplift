@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "livekit-plugins-uplift"
-version = "0.1.0"
+version = "0.1.1"
 description = "Agent Framework plugin for voice synthesis with Uplift AI."
 readme = "README.md"
 license = "Apache-2.0"
