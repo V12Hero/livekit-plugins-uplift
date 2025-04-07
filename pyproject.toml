@@ -4,18 +4,34 @@ build-backend = "hatchling.build"
 
 [project]
 name = "livekit-plugins-uplift"
-version = "0.1.1"
+dynamic = ["version"]
 description = "Agent Framework plugin for voice synthesis with Uplift AI."
 readme = "README.md"
 license = "Apache-2.0"
 requires-python = ">=3.9"
 authors = [{ name = "Ammar", email = "ammar@itsitgroup.com" }]
-dependencies = ["livekit-agents[codecs]>=1.0.0.rc6", "aiohttp"]
+keywords = ["webrtc", "realtime", "audio", "video", "livekit", "uplift", "tts"]
+classifiers = [
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Topic :: Multimedia :: Sound/Audio",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+dependencies = ["aiohttp", "livekit-agents[codecs]>=1.0.0.rc8"]
 
 [project.urls]
 Homepage = "https://github.com/V12Hero/livekit-plugins-uplift"
 Source = "https://github.com/V12Hero/livekit-plugins-uplift"
 Tracker = "https://github.com/V12Hero/livekit-plugins-uplift/issues"
+
+[tool.hatch.version]
+path = "livekit/plugins/uplift/version.py"
 
 [tool.hatch.build.targets.wheel]
 packages = ["livekit"]
