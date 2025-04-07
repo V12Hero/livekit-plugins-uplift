@@ -13,7 +13,7 @@ authors = [{ name = "Ammar", email = "ammar@itsitgroup.com" }]
 dependencies = ["livekit-agents[codecs]>=1.0.0.rc6", "aiohttp"]
 
 [project.urls]
-Homepage = "https://github.com/YOUR_GITHUB/livekit-plugins-uplift"
+Homepage = "https://github.com/V12Hero/livekit-plugins-uplift"
 
 [tool.hatch.build.targets.wheel]
 packages = ["livekit"]
