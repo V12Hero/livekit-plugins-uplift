@@ -14,6 +14,8 @@ dependencies = ["livekit-agents[codecs]>=1.0.0.rc6", "aiohttp"]
 
 [project.urls]
 Homepage = "https://github.com/V12Hero/livekit-plugins-uplift"
+Source = "https://github.com/V12Hero/livekit-plugins-uplift"
+Tracker = "https://github.com/V12Hero/livekit-plugins-uplift/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["livekit"]
