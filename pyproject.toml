@@ -23,7 +23,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
 ]
 
-dependencies = ["aiohttp", "livekit-agents[codecs]>=0.12.16,<1.0.0"]
+dependencies = ["aiohttp", "livekit-agents>=1.0.13"]
 
 [project.urls]
 Homepage = "https://github.com/V12Hero/livekit-plugins-uplift"
