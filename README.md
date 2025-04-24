@@ -19,6 +19,8 @@ The Uplift TTS is designed to work with Urdu script. The TTS should only receive
 ### Example
 
 ```python
+from livekit.plugins import uplift
+
 async def entrypoint(ctx: JobContext):
     initial_ctx = llm.ChatContext().append(
         role="system",
