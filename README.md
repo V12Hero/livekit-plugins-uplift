@@ -1,6 +1,6 @@
 # LiveKit Plugins - Uplift
 
-This plugin provides TTS integration for [Uplift AI](https://upliftai.org) into the LiveKit Agent Framework.
+This plugin provides TTS integration for [Uplift AI](https://upliftai.org) into the LiveKit Agent Framework. You can also find official documentation of [Uplift API](https://docs.upliftai.org/introduction)
 
 ## Installation
 
