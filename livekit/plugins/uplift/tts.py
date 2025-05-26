@@ -19,6 +19,7 @@ from livekit.agents import (
 from .log import logger
 from .models import TTSEncoding, TTSDefaultVoiceId, AvailableVoices
 
+
 def _sample_rate_from_format(output_format: TTSEncoding) -> int:
     """
     Extracts the sample rate from the given output format string.
@@ -32,12 +33,14 @@ def _sample_rate_from_format(output_format: TTSEncoding) -> int:
     parts = output_format.split("_")
     return int(parts[1]) if len(parts) > 1 else 22050
 
+
 @dataclass
 class _TTSOptions:
     api_key: str
     voice: str
     output_format: TTSEncoding
     base_url: str
+
 
 class TTS(tts.TTS):
     """
@@ -48,6 +51,7 @@ class TTS(tts.TTS):
         _session (aiohttp.ClientSession): HTTP session for making API requests.
         _streams (weakref.WeakSet): A set of active synthesis streams.
     """
+
     def __init__(
         self,
         *,
@@ -82,13 +86,16 @@ class TTS(tts.TTS):
 
         api_key = api_key or os.environ.get("UPLIFT_AI_API_KEY")
         if not api_key:
-            raise ValueError("Uplift API key is required, either as an argument or set in UPLIFT_AI_API_KEY environment variable")
+            raise ValueError(
+                "Uplift API key is required, either as an argument or set in UPLIFT_AI_API_KEY environment variable"
+            )
 
         self._opts = _TTSOptions(
             api_key=api_key,
             voice=voice,
             output_format=output_format,
-            base_url=base_url or "https://devapi.upliftai.org/v1", # old base_url: "https://api.upliftai.org/v1"
+            base_url=base_url
+            or "https://devapi.upliftai.org/v1",  # old base_url: "https://api.upliftai.org/v1"
         )
         self._session = http_session
         self._streams = weakref.WeakSet[SynthesizeStream]()
@@ -138,7 +145,9 @@ class TTS(tts.TTS):
         )
 
     # Updated stream() method: no text parameter required.
-    def stream(self, *, conn_options: Optional[APIConnectOptions] = None) -> SynthesizeStream:
+    def stream(
+        self, *, conn_options: Optional[APIConnectOptions] = None
+    ) -> SynthesizeStream:
         """
         Initiates a streaming text-to-speech synthesis session.
 
@@ -173,6 +182,7 @@ class ChunkedStream(tts.ChunkedStream):
         _opts (_TTSOptions): Configuration options for the TTS service.
         _session (aiohttp.ClientSession): HTTP session for making API requests.
     """
+
     def __init__(
         self,
         *,
@@ -258,6 +268,7 @@ class ChunkedStream(tts.ChunkedStream):
                 await utils.aio.gracefully_cancel(decode_task)
             await decoder.aclose()
 
+
 class SynthesizeStream(tts.SynthesizeStream):
     """Streamed API using Uplift streaming endpoint (requires full text upfront)"""
 
@@ -282,8 +293,7 @@ class SynthesizeStream(tts.SynthesizeStream):
             self._input_text += text
             logger.debug("SynthesizeStream pushed text chunk")
         else:
-             logger.warning("Attempted to push text after input ended.")
-
+            logger.warning("Attempted to push text after input ended.")
 
     def end_input(self) -> None:
         logger.debug("SynthesizeStream input ended.")
@@ -299,13 +309,13 @@ class SynthesizeStream(tts.SynthesizeStream):
             raise
 
         if not self._input_text:
-             logger.warning("SynthesizeStream run: No text received before input ended.")
-             await self._event_ch.aclose()
-             return
+            logger.warning("SynthesizeStream run: No text received before input ended.")
+            await self._event_ch.aclose()
+            return
 
-
-        logger.debug(f"SynthesizeStream run: Input finished. Synthesizing text: '{self._input_text[:50]}...'") # Log start of synthesis
-
+        logger.debug(
+            f"SynthesizeStream run: Input finished. Synthesizing text: '{self._input_text[:50]}...'"
+        )  # Log start of synthesis
 
         request_id = utils.shortuuid()
         data = {
@@ -324,27 +334,40 @@ class SynthesizeStream(tts.SynthesizeStream):
         )
         decode_task: asyncio.Task | None = None
         emitter = tts.SynthesizedAudioEmitter(
-                event_ch=self._event_ch,
-                request_id=request_id,
+            event_ch=self._event_ch,
+            request_id=request_id,
         )
 
         try:
-            logger.debug(f"SynthesizeStream run: Making POST request to {_stream_url(self._opts)} (req_id: {request_id})")
+            logger.debug(
+                f"SynthesizeStream run: Making POST request to {_stream_url(self._opts)} (req_id: {request_id})"
+            )
             async with self._session.post(
                 _stream_url(self._opts),
                 headers=headers,
                 json=data,
             ) as resp:
-                logger.debug(f"SynthesizeStream run: Received response status {resp.status} (req_id: {request_id})")
+                logger.debug(
+                    f"SynthesizeStream run: Received response status {resp.status} (req_id: {request_id})"
+                )
                 resp.raise_for_status()
 
                 if not resp.content_type.startswith("audio/"):
                     content = await resp.text()
-                    logger.error(f"Uplift stream returned non-audio data (type: {resp.content_type}): {content} (req_id: {request_id})")
-                    raise APIStatusError(f"Expected audio response, got {resp.content_type}", resp.status, request_id, content)
+                    logger.error(
+                        f"Uplift stream returned non-audio data (type: {resp.content_type}): {content} (req_id: {request_id})"
+                    )
+                    raise APIStatusError(
+                        f"Expected audio response, got {resp.content_type}",
+                        resp.status,
+                        request_id,
+                        content,
+                    )
 
+                logger.debug(
+                    f"SynthesizeStream run: Starting decode loop (req_id: {request_id})"
+                )
 
-                logger.debug(f"SynthesizeStream run: Starting decode loop (req_id: {request_id})")
                 async def _decode_loop():
                     chunk_count = 0
                     total_bytes = 0
@@ -353,15 +376,24 @@ class SynthesizeStream(tts.SynthesizeStream):
                             chunk_count += 1
                             total_bytes += len(chunk)
                             if not chunk:
-                                logger.debug(f"SynthesizeStream decode: Received empty chunk, breaking loop (req_id: {request_id})")
+                                logger.debug(
+                                    f"SynthesizeStream decode: Received empty chunk, breaking loop (req_id: {request_id})"
+                                )
                                 break
                             decoder.push(chunk)
-                        logger.debug(f"SynthesizeStream decode loop finished. Chunks: {chunk_count}, Total Bytes: {total_bytes} (req_id: {request_id})")
+                        logger.debug(
+                            f"SynthesizeStream decode loop finished. Chunks: {chunk_count}, Total Bytes: {total_bytes} (req_id: {request_id})"
+                        )
                     except Exception as e:
-                         logger.error(f"SynthesizeStream decode loop error: {e} (req_id: {request_id})", exc_info=True)
-                         raise
+                        logger.error(
+                            f"SynthesizeStream decode loop error: {e} (req_id: {request_id})",
+                            exc_info=True,
+                        )
+                        raise
                     finally:
-                        logger.debug(f"SynthesizeStream decode loop finally block: Ending decoder input (req_id: {request_id})")
+                        logger.debug(
+                            f"SynthesizeStream decode loop finally block: Ending decoder input (req_id: {request_id})"
+                        )
                         decoder.end_input()
 
                 decode_task = asyncio.create_task(_decode_loop())
@@ -371,20 +403,37 @@ class SynthesizeStream(tts.SynthesizeStream):
                     frame_count += 1
                     emitter.push(frame)
 
-                logger.debug(f"SynthesizeStream run: Finished iterating decoder. Total frames: {frame_count}. Flushing emitter (req_id: {request_id})")
+                logger.debug(
+                    f"SynthesizeStream run: Finished iterating decoder. Total frames: {frame_count}. Flushing emitter (req_id: {request_id})"
+                )
                 emitter.flush()
-                logger.debug(f"SynthesizeStream run: Emitter flushed. Waiting for decode task. (req_id: {request_id})")
+                logger.debug(
+                    f"SynthesizeStream run: Emitter flushed. Waiting for decode task. (req_id: {request_id})"
+                )
 
                 await decode_task
-                logger.debug(f"SynthesizeStream run: Decode task completed. (req_id: {request_id})")
-
+                logger.debug(
+                    f"SynthesizeStream run: Decode task completed. (req_id: {request_id})"
+                )
 
         except asyncio.TimeoutError as e:
-            logger.error(f"SynthesizeStream run: API Timeout Error (req_id: {request_id})", exc_info=True)
-            raise APITimeoutError(f"API request timed out for request {request_id}") from e
+            logger.error(
+                f"SynthesizeStream run: API Timeout Error (req_id: {request_id})",
+                exc_info=True,
+            )
+            raise APITimeoutError(
+                f"API request timed out for request {request_id}"
+            ) from e
         except aiohttp.ClientResponseError as e:
-            body_text = await e.response.text() if hasattr(e, 'response') and e.response else None
-            logger.error(f"SynthesizeStream run: API Status Error {e.status}: {e.message} - Body: {body_text} (req_id: {request_id})", exc_info=True)
+            body_text = (
+                await e.response.text()
+                if hasattr(e, "response") and e.response
+                else None
+            )
+            logger.error(
+                f"SynthesizeStream run: API Status Error {e.status}: {e.message} - Body: {body_text} (req_id: {request_id})",
+                exc_info=True,
+            )
             raise APIStatusError(
                 message=f"{e.message} - Check Uplift API Key and Voice ID.",
                 status_code=e.status,
@@ -392,15 +441,24 @@ class SynthesizeStream(tts.SynthesizeStream):
                 body=body_text,
             ) from e
         except Exception as e:
-            logger.error(f"SynthesizeStream run: Unexpected Error (req_id: {request_id})", exc_info=True)
+            logger.error(
+                f"SynthesizeStream run: Unexpected Error (req_id: {request_id})",
+                exc_info=True,
+            )
             raise APIConnectionError(f"An unexpected error occurred: {e}") from e
         finally:
-            logger.debug(f"SynthesizeStream run: Main try block finished or exception occurred. Cleaning up decoder. (req_id: {request_id})")
+            logger.debug(
+                f"SynthesizeStream run: Main try block finished or exception occurred. Cleaning up decoder. (req_id: {request_id})"
+            )
             await decoder.aclose()
-            logger.debug(f"SynthesizeStream run: Cleanup complete. (req_id: {request_id})")
+            logger.debug(
+                f"SynthesizeStream run: Cleanup complete. (req_id: {request_id})"
+            )
+
 
 def _synthesize_url(opts: _TTSOptions) -> str:
     return f"{opts.base_url}/synthesis/text-to-speech"
+
 
 def _stream_url(opts: _TTSOptions) -> str:
     return f"{opts.base_url}/synthesis/text-to-speech/stream"

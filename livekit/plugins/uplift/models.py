@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from typing import Literal
 
 TTSEncoding = Literal[
@@ -12,5 +11,4 @@ TTSEncoding = Literal[
 ]
 
 TTSDefaultVoiceId = "v_30s70t3a"
-AvailableVoices = [ "v_kwmp7zxt", "v_yypgzenx", "v_30s70t3a" ]
-
+AvailableVoices = ["v_kwmp7zxt", "v_yypgzenx", "v_30s70t3a"]
