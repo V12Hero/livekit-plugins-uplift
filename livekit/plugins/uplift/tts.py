@@ -88,7 +88,7 @@ class TTS(tts.TTS):
             api_key=api_key,
             voice=voice,
             output_format=output_format,
-            base_url=base_url or "https://api.upliftai.org/v1",
+            base_url=base_url or "https://devapi.upliftai.org/v1", # old base_url: "https://api.upliftai.org/v1"
         )
         self._session = http_session
         self._streams = weakref.WeakSet[SynthesizeStream]()
