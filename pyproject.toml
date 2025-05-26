@@ -9,7 +9,7 @@ description = "Agent Framework plugin for voice synthesis with Uplift AI."
 readme = "README.md"
 license = "Apache-2.0"
 requires-python = ">=3.9"
-authors = [{ name = "Ammar", email = "ammar@itsitgroup.com" }]
+authors = [{ name = "V12Hero", email = "support@v12hero.com" }]
 keywords = ["webrtc", "realtime", "audio", "video", "livekit", "uplift", "tts"]
 classifiers = [
     "Intended Audience :: Developers",
